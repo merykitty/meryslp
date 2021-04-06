@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.merykitty</groupId>
+  <artifactId>slp-processor</artifactId>
+  <version>0.0.1</version>
+
+  <name>slp-processor</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <junit.version>4.13.2</junit.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-surefile-plugin.version>3.0.0-M5</maven-surefile-plugin.version>
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <project.resource-basedir>${project.basedir}/src/main/resources/io/github/merykitty/slpprocessor</project.resource-basedir>
+    <project.output-basedir>${project.build.outputDirectory}/io/github/merykitty/slpprocessor</project.output-basedir>
+    <user.lib-directory>/usr/lib/x86_64-linux-gnu</user.lib-directory>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20210307</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+        <configuration>
+          <outputDirectory>${project.output-basedir}</outputDirectory>
+          <resources>
+            <resource>
+              <directory>${project.resource-basedir}</directory>
+              <excludes>
+                <exclude>**/*.cpp</exclude>
+                <exclude>**/.vscode/**</exclude>
+              </excludes>
+            </resource>
+          </resources>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <compilerArgs>
+
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefile-plugin.version}</version>
+        <configuration>
+          <argLine>-Dforeign.restricted=permit</argLine>
+          <trimStackTrace>false</trimStackTrace>
+          <useFile>false</useFile>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>compile-png</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <executable>g++</executable>
+              <arguments>
+                <argument>-O3</argument>
+                <argument>-c</argument>
+                <argument>-fPIC</argument>
+                <argument>-o</argument>
+                <argument>${java.io.tmpdir}/pngutils.o</argument>
+                <argument>${project.resource-basedir}/image/pngutils.cpp</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>link-png</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <executable>g++</executable>
+              <arguments>
+                <argument>-O3</argument>
+                <argument>-shared</argument>
+                <argument>-o</argument>
+                <argument>${project.output-basedir}/image/pngutils.so</argument>
+                <argument>${java.io.tmpdir}/pngutils.o</argument>
+                <argument>-Wl,-rpath=${user.lib-directory}</argument>
+                <argument>-lpng</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>default-cli</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-Dforeign.restricted=permit</argument>
+                <argument>-XX:CompileThreshold=1000</argument>
+                <argument>-XX:+UseParallelGC</argument>
+                <argument>-XX:+UnlockDiagnosticVMOptions</argument>
+                <argument>-XX:+UnlockExperimentalVMOptions</argument>
+                <argument>-XX:+TrustFinalNonStaticFields</argument>
+                <argument>-ea</argument>
+                <argument>--module-path</argument>
+                <classpath/>
+                <argument>-cp</argument>
+                <classpath/>
+                <argument>io.github.merykitty.slpprocessor.Test</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
