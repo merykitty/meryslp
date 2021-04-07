@@ -20,6 +20,7 @@
     <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-surefile-plugin.version>3.0.0-M5</maven-surefile-plugin.version>
+    <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
     <project.resource-basedir>${project.basedir}/src/main/resources/io/github/merykitty/slpprocessor</project.resource-basedir>
     <project.output-basedir>${project.build.outputDirectory}/io/github/merykitty/slpprocessor</project.output-basedir>
@@ -31,6 +32,12 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20210307</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.argparse4j</groupId>
+      <artifactId>argparse4j</artifactId>
+      <version>0.8.1</version>
     </dependency>
 
     <dependency>
@@ -84,6 +91,12 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>${maven-install-plugin.version}</version>
+      </plugin>
+
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec-maven-plugin.version}</version>
@@ -123,6 +136,27 @@
                 <argument>${java.io.tmpdir}/pngutils.o</argument>
                 <argument>-Wl,-rpath=${user.lib-directory}</argument>
                 <argument>-lpng</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>create-decoder</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>install</phase>
+            <configuration>
+              <executable>jpackage</executable>
+              <arguments>
+                <argument>--java-options</argument>
+                <argument>"-Dforeign.restricted=permit -XX:+UseParallelGC -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields"</argument>
+                <argument>-n</argument>
+                <argument>SLPDecoder</argument>
+                <argument>-p</argument>
+                <classpath/>
+                <argument>-m</argument>
+                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.SLPDecoder</argument>
               </arguments>
             </configuration>
           </execution>

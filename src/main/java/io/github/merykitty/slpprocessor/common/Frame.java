@@ -76,9 +76,9 @@ public class Frame {
 
     public static Frame importFrame(JSONObject frameData, Path imageFolder, int frameNum) throws IOException {
         try (var artboard = Artboard.importFrame(imageFolder, frameNum)) {
+            int properties = frameData.getInt("properties");
             int width = artboard.width();
             int height = artboard.height();
-            int properties = frameData.getInt("properties");
             int hotspotX = frameData.getInt("hotspot_x");
             int hotspotY = frameData.getInt("hotspot_y");
             var frameInfo = FrameInfo.emptyBuilder()

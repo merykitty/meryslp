@@ -25,13 +25,11 @@ public class SecondaryFrame {
 
     private SecondaryFrameInfo frameInfo;
     private FrameRowEdge[] frameRowEdgeList;
-    private CommandOffset[] commandOffsetList;
     private List<SecondaryCommand> commandList;
 
-    private SecondaryFrame(SecondaryFrameInfo frameInfo, FrameRowEdge[] frameRowEdgeList, CommandOffset[] commandOffsetList, List<SecondaryCommand> commandList) {
+    private SecondaryFrame(SecondaryFrameInfo frameInfo, FrameRowEdge[] frameRowEdgeList, List<SecondaryCommand> commandList) {
         this.frameInfo = frameInfo;
         this.frameRowEdgeList = frameRowEdgeList;
-        this.commandOffsetList = commandOffsetList;
         this.commandList = commandList;
     }
 
@@ -69,26 +67,27 @@ public class SecondaryFrame {
                 }
             }
         }
-        return new SecondaryFrame(frameInfo, frameRowEdgeList, commandOffsetList, commandList);
+        return new SecondaryFrame(frameInfo, frameRowEdgeList, commandList);
     }
 
     public static SecondaryFrame importFrame(JSONObject frameData, Path imageFolder, int frameNum) throws IOException {
         try (var artboard = SecondaryArtboard.importFrame(imageFolder, frameNum)) {
+            int properties = frameData.getInt("sec_properties");
+            int frameType = frameData.getInt("sec_frame_type");
             int width = artboard.width();
             int height = artboard.height();
-            int frameType = frameData.getInt("sec_frame_type");
             int hotspotX = frameData.getInt("sec_hotspot_x");
             int hotspotY = frameData.getInt("sec_hotspot_y");
-            var rowEdgeList = new FrameRowEdge[height];
-            var commandOffsetList = new CommandOffset[height];
-            var commandList = new ArrayList<SecondaryCommand>();
             var frameInfo = SecondaryFrameInfo.emptyBuilder()
+                    .properties(properties)
+                    .frameType(new ubyte((byte)frameType))
                     .width(width)
                     .height(height)
-                    .frameType(new ubyte((byte)frameType))
                     .hotspotX(hotspotX)
                     .hotspotY(hotspotY)
                     .build();
+            var rowEdgeList = new FrameRowEdge[height];
+            var commandList = new ArrayList<SecondaryCommand>();
             for (int y = 0; y < height; y++) {
                 int leftEdge;
                 int rightEdge;
@@ -128,7 +127,7 @@ public class SecondaryFrame {
                 assert(leftEdge <= ushort.MAX_VALUE.value() && rightEdge < ushort.MAX_VALUE.value());
                 rowEdgeList[y] = new FrameRowEdge(new ushort((short)leftEdge), new ushort ((short)rightEdge));
             }
-            return new SecondaryFrame(frameInfo, rowEdgeList, commandOffsetList, commandList);
+            return new SecondaryFrame(frameInfo, rowEdgeList, commandList);
         }
     }
 
@@ -137,6 +136,7 @@ public class SecondaryFrame {
         int height = this.frameInfo.height();
 
         var frameData = new JSONObject();
+        frameData.put("sec_properties", this.frameInfo.properties());
         frameData.put("sec_frame_type", this.frameInfo.frameType());
         frameData.put("sec_hotspot_x", this.frameInfo.hotspotX());
         frameData.put("sec_hotspot_y", this.frameInfo.hotspotY());
@@ -174,8 +174,8 @@ public class SecondaryFrame {
             this.frameRowEdgeList[i].toNativeData(data, currentOffset);
             currentOffset += FrameRowEdge.nativeByteSize();
         }
-        long commandOffset = roundUpMod16(currentOffset);
-        currentOffset = commandOffset;
+        long commandOffsetOffset = roundUpMod16(currentOffset);
+        currentOffset = commandOffsetOffset;
         for (int i = 0; i < height; i++) {
             currentOffset += CommandOffset.nativeByteSize();
         }
@@ -195,10 +195,10 @@ public class SecondaryFrame {
         }
         long finalOffset = currentOffset;
         var frameInfo = this.frameInfo.builder()
-                .cmdTableOffset(new uint((int)commandOffset))
+                .cmdTableOffset(new uint((int)commandOffsetOffset))
                 .outlineTableOffset(new uint((int)outlineOffset))
                 .build();
-        currentOffset = commandOffset;
+        currentOffset = commandOffsetOffset;
         for (int i = 0; i < height; i++) {
             commandOffsetList[i].toNativeData(data, currentOffset);
             currentOffset += CommandOffset.nativeByteSize();

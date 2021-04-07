@@ -13,7 +13,6 @@ public class SLPFileTest {
     private static final String PALETTE_FOLDER = "/mnt/c/Program Files (x86)/Steam/steamapps/common/AoEDE/Assets/Palettes";
     private static final String CONFIG_FILE = Palette.class.getResource("aoe1-config.json").getPath();
 
-    @Test
     public void testFile() throws IOException {
         var palettes = new PaletteContainer(Path.of(CONFIG_FILE), Path.of(PALETTE_FOLDER));
         SLPFiles.decode(testFile, palettes);
