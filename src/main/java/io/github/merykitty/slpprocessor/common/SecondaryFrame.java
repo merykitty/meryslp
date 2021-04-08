@@ -3,13 +3,14 @@ package io.github.merykitty.slpprocessor.common;
 import io.github.merykitty.slpprocessor.command.Commands;
 import io.github.merykitty.slpprocessor.command.DrawCursor;
 import io.github.merykitty.slpprocessor.command.SecondaryCommand;
-import io.github.merykitty.slpprocessor.command.impl.EndOfRow;
 import io.github.merykitty.slpprocessor.command.impl.SecEndOfRow;
 import io.github.merykitty.slpprocessor.image.SecFrameType;
 import io.github.merykitty.slpprocessor.image.SecondaryArtboard;
-import io.github.merykitty.slpprocessor.misc.*;
+import io.github.merykitty.slpprocessor.misc.SecFrameSerializeRecord;
+import io.github.merykitty.slpprocessor.misc.ubyte;
+import io.github.merykitty.slpprocessor.misc.uint;
+import io.github.merykitty.slpprocessor.misc.ushort;
 import jdk.incubator.foreign.MemorySegment;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -150,7 +151,7 @@ public class SecondaryFrame {
                     if (this.frameRowEdgeList[y].leftSpace() != EMPTY_SIGNAL && this.frameRowEdgeList[y].rightSpace() != EMPTY_SIGNAL) {
                         assert (drawCursor.x() == width - this.frameRowEdgeList[y].rightSpace()) : ("Expected cursor x = " + (width - this.frameRowEdgeList[y].rightSpace()) + ", actual cursor x = " + drawCursor.x());
                     } else {
-                        assert (this.commandList.get(i - 1) instanceof SecEndOfRow);
+                        assert (i == 0 || this.commandList.get(i - 1) instanceof SecEndOfRow);
                     }
                     y++;
                     if (y < height) {

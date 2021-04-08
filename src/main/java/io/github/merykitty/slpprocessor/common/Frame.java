@@ -40,6 +40,7 @@ public class Frame {
     public static Frame ofNativeData(MemorySegment data, FrameInfo frameInfo, Version version, PaletteContainer palettes) {
         int height = frameInfo.height();
         long currentOffset = frameInfo.outlineTableOffset();
+        assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
         var frameRowEdgeList = new FrameRowEdge[height];
         for (int i = 0; i < height; i++) {
             var frameRowEdge = FrameRowEdge.ofNativeData(data, currentOffset);
@@ -47,6 +48,7 @@ public class Frame {
             currentOffset += FrameRowEdge.nativeByteSize();
         }
         currentOffset = frameInfo.cmdTableOffset();
+        assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
         var commandOffsetList = new CommandOffset[height];
         for (int i = 0; i < height; i++) {
             var commandOffset = CommandOffset.ofNativeData(data, currentOffset);
@@ -223,7 +225,7 @@ public class Frame {
 
     private static PxColourValueType commandDataType(Version version, int properties) {
         PxColourValueType commandDataType;
-        if (properties == 0x07) {
+        if ((properties & 0x07) == 0x07) {
             commandDataType = PxColourValueType.RAW_COLOUR;
         } else {
             if (version.lessThan(Version.of("4.1a"))) {

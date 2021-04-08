@@ -175,8 +175,9 @@
                 <argument>-XX:+UnlockDiagnosticVMOptions</argument>
                 <argument>-XX:+UnlockExperimentalVMOptions</argument>
                 <argument>-XX:+TrustFinalNonStaticFields</argument>
+                <argument>-XX:StartFlightRecording:duration=300s,filename=profile.jfr,delay=10s,settings=strict.jfc</argument>
                 <argument>-ea</argument>
-                <argument>--module-path</argument>
+                <argument>-p</argument>
                 <classpath/>
                 <argument>-cp</argument>
                 <classpath/>

@@ -11,10 +11,10 @@ import io.github.merykitty.slpprocessor.image.PaletteContainer;
 public class Test {
     private static final Path PALETTE_FOLDER = Path.of("/mnt/c/Program Files (x86)/Steam/steamapps/common/AoEDE/Assets/Palettes");
     private static final Path CONFIG_FILE = Path.of(Palette.class.getResource("aoe1-config.json").getPath());
-    private static final Path DECODE_INPUT_FOLDER = Path.of("/mnt/e/stuffs/aoemod/decode-input");
-    private static final Path DECODE_OUTPUT_FOLDER = Path.of("/mnt/e/stuffs/aoemod/decode-output");
-    private static final Path ENCODE_INPUT_FOLDER = Path.of("/mnt/e/stuffs/aoemod/encode-input");
-    private static final Path ENCODE_OUTPUT_FOLDER = Path.of("/mnt/e/stuffs/aoemod/encode-output");
+    private static final Path DECODE_INPUT_FOLDER = Path.of("./data/decode-input-test");
+    private static final Path DECODE_OUTPUT_FOLDER = Path.of("./data/decode-output-test");
+    private static final Path ENCODE_INPUT_FOLDER = Path.of("./data/encode-input");
+    private static final Path ENCODE_OUTPUT_FOLDER = Path.of("./data/encode-output");
 
     public static void main(String[] args) throws IOException {
         decode();
@@ -24,7 +24,6 @@ public class Test {
         var palettes = new PaletteContainer(CONFIG_FILE, PALETTE_FOLDER);
         var files = Files.list(DECODE_INPUT_FOLDER);
         files.filter(Files::isRegularFile)
-                .filter(path -> path.toString().toLowerCase().contains("tree"))
                 .forEach(path -> processSLPFile(path, palettes));
     }
 

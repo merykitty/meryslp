@@ -17,4 +17,6 @@ public class SLPFileTest {
         var palettes = new PaletteContainer(Path.of(CONFIG_FILE), Path.of(PALETTE_FOLDER));
         SLPFiles.decode(testFile, palettes);
     }
+
+    /*a_all_whale_x4.slp*/
 }

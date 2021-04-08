@@ -19,7 +19,7 @@ public class PremultipliedAlpha implements Command {
 
     public PremultipliedAlpha (MemorySegment data, long offset, PxColourValueType type, Palette palette) {
         assert(type == PxColourValueType.RAW_COLOUR);
-        int length = MemoryAccess.getByteAtOffset(data, offset + 1);
+        int length = new ubyte(MemoryAccess.getByteAtOffset(data, offset + 1)).value();
         var commandData = new PxRawColour[length];
         long currentOffset = offset + 2;
         for (int i = 0; i < length; i++) {

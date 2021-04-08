@@ -50,7 +50,7 @@ public class PaletteContainer {
         while (true) {
             var entry = this.entryList[bucket];
             if (entry.value.isEmpty()) {
-                assert(paletteId == 0x07);
+                assert((paletteId & 0x07) == 0x07) : ("Unexpected palette: " + paletteId);
                 return Palette.default;
             } else {
                 if (entry.key == paletteId) {
