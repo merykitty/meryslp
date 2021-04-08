@@ -10,6 +10,7 @@ import io.github.merykitty.slpprocessor.misc.SecFrameSerializeRecord;
 import io.github.merykitty.slpprocessor.misc.ubyte;
 import io.github.merykitty.slpprocessor.misc.uint;
 import io.github.merykitty.slpprocessor.misc.ushort;
+import jdk.incubator.foreign.MemoryAccess;
 import jdk.incubator.foreign.MemorySegment;
 import org.json.JSONObject;
 
@@ -34,7 +35,7 @@ public class SecondaryFrame {
         this.commandList = commandList;
     }
 
-    public static SecondaryFrame ofNativeData(MemorySegment data, SecondaryFrameInfo frameInfo) {
+    public static SecondaryFrame ofNativeData(MemorySegment data, SecondaryFrameInfo frameInfo, long nextFrameOffset) {
         int height = frameInfo.height();
         long currentOffset = frameInfo.outlineTableOffset();
         assert((currentOffset & 0x0f) == 0);
@@ -43,6 +44,9 @@ public class SecondaryFrame {
             var frameRowEdge = FrameRowEdge.ofNativeData(data, currentOffset);
             frameRowEdgeList[i] = frameRowEdge;
             currentOffset += frameRowEdge.nativeByteSize();
+        }
+        for (long i = currentOffset; i < frameInfo.cmdTableOffset(); i++) {
+            assert(MemoryAccess.getByteAtOffset(data, i) == 0);
         }
         currentOffset = frameInfo.cmdTableOffset();
         assert((currentOffset & 0x0f) == 0);
@@ -68,11 +72,15 @@ public class SecondaryFrame {
                 }
             }
         }
+        for (long i = currentOffset; i < nextFrameOffset; i++) {
+            assert(MemoryAccess.getByteAtOffset(data, i) == 0);
+        }
         return new SecondaryFrame(frameInfo, frameRowEdgeList, commandList);
     }
 
     public static SecondaryFrame importFrame(JSONObject frameData, Path imageFolder, int frameNum) throws IOException {
         try (var artboard = SecondaryArtboard.importFrame(imageFolder, frameNum)) {
+            int nul = frameData.getInt("sec_null");
             int properties = frameData.getInt("sec_properties");
             int frameType = frameData.getInt("sec_frame_type");
             int width = artboard.width();
@@ -80,6 +88,7 @@ public class SecondaryFrame {
             int hotspotX = frameData.getInt("sec_hotspot_x");
             int hotspotY = frameData.getInt("sec_hotspot_y");
             var frameInfo = SecondaryFrameInfo.emptyBuilder()
+                    .nul(nul)
                     .properties(properties)
                     .frameType(new ubyte((byte)frameType))
                     .width(width)
@@ -137,6 +146,7 @@ public class SecondaryFrame {
         int height = this.frameInfo.height();
 
         var frameData = new JSONObject();
+        frameData.put("sec_null", this.frameInfo.nul());
         frameData.put("sec_properties", this.frameInfo.properties());
         frameData.put("sec_frame_type", this.frameInfo.frameType());
         frameData.put("sec_hotspot_x", this.frameInfo.hotspotX());

@@ -99,7 +99,7 @@ public class Header {
         VERSION_HANDLE.set(data, 0L, (byte)(this.version.major() + '0'));
         VERSION_HANDLE.set(data, 1L, (byte)('.'));
         VERSION_HANDLE.set(data, 2L, (byte)(this.version.minor() + '0'));
-        VERSION_HANDLE.set(data, 3L, (byte)this.version.release());
+        VERSION_HANDLE.set(data, 3L, (byte)(this.version.release() - 'a' + 'A'));
         NUM_FRAMES_HANDLE.set(data, this.numFrames);
         TYPE_HANDLE.set(data, this.type);
         NUM_DIRECTIONS_HANDLE.set(data, this.numDirections);

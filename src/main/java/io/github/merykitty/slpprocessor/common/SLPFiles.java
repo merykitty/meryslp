@@ -69,6 +69,10 @@ public class SLPFiles {
         return ((in - 1) & 0xfffffffffffffff0L) + 0x10;
     }
 
+    public static long roundUpMod32(long in) {
+        return ((in - 1) & 0xffffffffffffffe0L) + 0x20;
+    }
+
     private static SLPFile processSegment(MemorySegment file, boolean maybeCompressed, PaletteContainer palettes) {
         try (var data = file) {
             var version = Version.ofNativeData(data.asSlice(VERSION_OFFSET, VERSION_SIZE));

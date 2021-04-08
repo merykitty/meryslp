@@ -75,8 +75,7 @@ public class RawColour {
     }
 
     public ubyte toGrey() {
-        assert(this.red == this.green && this.red == this.blue);
-        return this.red;
+        return new ubyte((byte)((this.red.value() + this.green.value() + this.blue.value()) / 3)) ;
     }
 
     public RawColour reverseAlpha() {

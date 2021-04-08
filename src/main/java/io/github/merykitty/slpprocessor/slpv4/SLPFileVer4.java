@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 import io.github.merykitty.slpprocessor.common.*;
 import io.github.merykitty.slpprocessor.misc.PrimitiveOptional;
+import jdk.incubator.foreign.MemoryAccess;
 import jdk.incubator.foreign.MemorySegment;
 
 import org.json.JSONObject;
@@ -16,6 +17,7 @@ import io.github.merykitty.slpprocessor.image.PaletteContainer;
 import org.json.JSONTokener;
 
 import static io.github.merykitty.slpprocessor.common.SLPFiles.roundUpMod16;
+import static io.github.merykitty.slpprocessor.common.SLPFiles.roundUpMod32;
 
 @__primitive__
 public class SLPFileVer4 implements SLPFile {
@@ -35,6 +37,7 @@ public class SLPFileVer4 implements SLPFile {
         var version = header.version();
         int numFrames = header.numFrames();
         currentOffset = header.offsetMain();
+        assert(currentOffset == 0x20);
         assert((currentOffset & 0x0f) == 0);
         var frameInfoList = new FrameInfo[numFrames];
         for (int i = 0; i < numFrames; i++) {
@@ -42,10 +45,23 @@ public class SLPFileVer4 implements SLPFile {
             frameInfoList[i] = tempFrameInfo;
             currentOffset += FrameInfo.nativeByteSize();
         }
+        for (long i = currentOffset; i < frameInfoList[0].outlineTableOffset(); i++) {
+            assert(MemoryAccess.getByteAtOffset(file, i) == 0);
+        }
         var frameList = new Frame[numFrames];
         for (int i = 0; i < numFrames; i++) {
             var frameInfo = frameInfoList[i];
-            var frame = Frame.ofNativeData(file, frameInfo, version, palettes);
+            long nextFrameOffset;
+            if (i < numFrames - 1) {
+                nextFrameOffset = frameInfoList[i + 1].outlineTableOffset();
+            } else {
+                if (header.offsetSecondary() != 0) {
+                    nextFrameOffset = header.offsetSecondary();
+                } else {
+                    nextFrameOffset = file.byteSize();
+                }
+            }
+            var frame = Frame.ofNativeData(file, frameInfo, nextFrameOffset, version, palettes);
             frameList[i] = frame;
         }
 
@@ -54,17 +70,26 @@ public class SLPFileVer4 implements SLPFile {
         if (currentOffset == 0) {
             secFrameList = null;
         } else {
-            assert((currentOffset & 0x0f) == 0);
+            assert((currentOffset & 0x1f) == 0);
             var secFrameInfoList = new SecondaryFrameInfo[numFrames];
             for (int i = 0; i < numFrames; i++) {
                 var tempSecFrameInfo = SecondaryFrameInfo.ofNativeData(file, currentOffset);
                 secFrameInfoList[i] = tempSecFrameInfo;
                 currentOffset += SecondaryFrameInfo.nativeByteSize();
             }
+            for (long i = currentOffset; i < secFrameInfoList[0].outlineTableOffset(); i++) {
+                assert(MemoryAccess.getByteAtOffset(file, i) == 0);
+            }
             secFrameList = new SecondaryFrame[numFrames];
             for (int i = 0; i < numFrames; i++) {
                 var frameInfo = secFrameInfoList[i];
-                var frame = SecondaryFrame.ofNativeData(file, frameInfo);
+                long nextFrameOffset;
+                if (i < numFrames - 1) {
+                    nextFrameOffset = secFrameInfoList[i + 1].outlineTableOffset();
+                } else {
+                    nextFrameOffset = file.byteSize();
+                }
+                var frame = SecondaryFrame.ofNativeData(file, frameInfo, nextFrameOffset);
                 secFrameList[i] = frame;
             }
         }
@@ -106,9 +131,7 @@ public class SLPFileVer4 implements SLPFile {
         var version = this.header.version();
         int numFrames = this.header.numFrames();
         var frameInfoList = new FrameInfo[numFrames];
-        for (int i = 0; i < numFrames; i++) {
-            currentOffset += FrameInfo.nativeByteSize();
-        }
+        currentOffset += numFrames * FrameInfo.nativeByteSize();
         for (int i = 0; i < numFrames; i++) {
             currentOffset = roundUpMod16(currentOffset);
             var frame = this.frameList[i];
@@ -120,12 +143,10 @@ public class SLPFileVer4 implements SLPFile {
         SecondaryFrameInfo[] secFrameInfoList = null;
         if (this.secFrameList.isPresent()) {
             var secFrameList = this.secFrameList.get();
-            secFrameInfoOffset = roundUpMod16(currentOffset);
+            secFrameInfoOffset = roundUpMod32(currentOffset);
             currentOffset = secFrameInfoOffset;
             secFrameInfoList = new SecondaryFrameInfo[numFrames];
-            for (int i = 0; i < numFrames; i++) {
-                currentOffset += SecondaryFrameInfo.nativeByteSize();
-            }
+            currentOffset += SecondaryFrameInfo.nativeByteSize() * numFrames;
             for (int i = 0; i < numFrames; i++) {
                 currentOffset = roundUpMod16(currentOffset);
                 var frame = secFrameList[i];
@@ -197,7 +218,7 @@ public class SLPFileVer4 implements SLPFile {
         }
         if (this.secFrameList.isPresent()) {
             var secFrameList = this.secFrameList.get();
-            result = roundUpMod16(result);
+            result = roundUpMod32(result);
             result += numFrames * SecondaryFrameInfo.nativeByteSize();
             for (int i = 0; i < numFrames; i++) {
                 var secFrame = secFrameList[i];

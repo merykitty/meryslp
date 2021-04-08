@@ -72,6 +72,16 @@ public class Commands {
         RawColour currentColour = RawColour.default;
         ubyte currentShade = ubyte.default;
         for(int x = startX, consecutive = 0;; x++) {
+            if (x - startX >= 255) {
+                if (type == PixelType.RAW) {
+                    type = PixelType.RAW_DISTINCT;
+                } else if (type == PixelType.PLAYER) {
+                    type = PixelType.PLAYER_DISTINCT;
+                }
+                command = resolveCommand(artboard, startX, x, y, type);
+                cursor = new DrawCursor(x, y);
+                break;
+            }
             if (x == artboard.width()) {
                 if (type == PixelType.RAW) {
                     type = PixelType.RAW_DISTINCT;
@@ -244,6 +254,14 @@ public class Commands {
         SecondaryCommand command;
         ubyte currentShade = ubyte.default;
         for (int x = startX, consecutive = 0;; x++) {
+            if (x - startX >= 255) {
+                if (type == SecPixelType.MAIN) {
+                    type = SecPixelType.MAIN_DISTINCT;
+                }
+                command = resolveSecCommand(artboard, startX, x, y, type);
+                cursor = new DrawCursor(x, y);
+                break;
+            }
             if (x == artboard.width()) {
                 if (type == SecPixelType.MAIN) {
                     type = SecPixelType.MAIN_DISTINCT;

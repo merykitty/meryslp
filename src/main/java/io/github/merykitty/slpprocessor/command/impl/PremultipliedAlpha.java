@@ -34,9 +34,6 @@ public class PremultipliedAlpha implements Command {
     public PremultipliedAlpha(Artboard artboard, int startX, int endX, int y) {
         int length = endX - startX;
         BooleanSupplier verifier = () -> {
-            if (length < Commands.LESSER_THRESHOLD) {
-                return false;
-            }
             for (int x = startX; x < endX; x++) {
                 var rawOptional = artboard.readRaw(x, y);
                 if (rawOptional.isEmpty() || rawOptional.get().alpha().value() == ubyte.MAX_VALUE.value()) {
@@ -45,7 +42,8 @@ public class PremultipliedAlpha implements Command {
             }
             return true;
         };
-        assert(verifier.getAsBoolean() && length < COMMAND_CAPACITY);
+        assert(verifier.getAsBoolean());
+        assert(length < COMMAND_CAPACITY);
         var data = new PxRawColour[length];
         for (int i = 0; i < length; i++) {
             data[i] = PxRawColour.of(artboard.readRaw(startX + i, y).get());
@@ -66,12 +64,14 @@ public class PremultipliedAlpha implements Command {
 
     @Override
     public void toNative(MemorySegment data, long offset, PxColourValueType dataType, Palette palette) {
+        assert(dataType == PxColourValueType.RAW_COLOUR);
         int length = this.data.length;
         MemoryAccess.setByteAtOffset(data, offset, (byte)0x9e);
         MemoryAccess.setByteAtOffset(data, offset + 1, (byte)length);
         offset += COMMAND_LENGTH;
         for (int i = 0; i < length; i++, offset += dataType.nativeByteSize()) {
-            this.data[i].toNative(data, offset, dataType, palette);
+            var temp = PxRawColour.of(this.data[i].colour().reverseAlpha());
+            temp.toNative(data, offset, dataType, palette);
         }
     }
 

@@ -15,8 +15,9 @@ public class SecondaryFrameInfo {
     private static final MemoryLayout NATIVE_LAYOUT = MemoryLayout.ofStruct(
             JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_cmd_table_offset").withBitAlignment(8L),
             JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_outline_table_offset").withBitAlignment(8L),
-            PAD_16, PAD_8,
-            JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_properties").withBitAlignment(8L),
+            JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_null").withBitAlignment(8L),
+            JAVA_SHORT.withOrder(LITTLE_ENDIAN).withName("sec_properties_lo").withBitAlignment(8L),
+            JAVA_BYTE.withOrder(LITTLE_ENDIAN).withName("sec_properties_hi").withBitAlignment(8L),
             JAVA_BYTE.withOrder(LITTLE_ENDIAN).withName("sec_frame_type").withBitAlignment(8L),
             JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_width").withBitAlignment(8L),
             JAVA_INT.withOrder(LITTLE_ENDIAN).withName("sec_height").withBitAlignment(8L),
@@ -28,7 +29,9 @@ public class SecondaryFrameInfo {
 
     private static final VarHandle CMD_TABLE_OFFSET_HANDLE;
     private static final VarHandle OUTLINE_TABLE_OFFSET_HANDLE;
-    private static final VarHandle PROPERTIES_HANDLE;
+    private static final VarHandle NUL_HANDLE;
+    private static final VarHandle PROPERTIES_LO_HANDLE;
+    private static final VarHandle PROPERTIES_HI_HANDLE;
     private static final VarHandle FRAME_TYPE_HANDLE;
     private static final VarHandle WIDTH_HANDLE;
     private static final VarHandle HEIGHT_HANDLE;
@@ -38,7 +41,9 @@ public class SecondaryFrameInfo {
     static {
         CMD_TABLE_OFFSET_HANDLE = NATIVE_LAYOUT.varHandle(int.class,groupElement("sec_cmd_table_offset")).withInvokeExactBehavior();
         OUTLINE_TABLE_OFFSET_HANDLE = NATIVE_LAYOUT.varHandle(int.class,groupElement("sec_outline_table_offset")).withInvokeExactBehavior();
-        PROPERTIES_HANDLE = NATIVE_LAYOUT.varHandle(int.class, groupElement("sec_properties")).withInvokeExactBehavior();
+        NUL_HANDLE = NATIVE_LAYOUT.varHandle(int.class, groupElement("sec_null")).withInvokeExactBehavior();
+        PROPERTIES_LO_HANDLE = NATIVE_LAYOUT.varHandle(short.class, groupElement("sec_properties_lo")).withInvokeExactBehavior();
+        PROPERTIES_HI_HANDLE = NATIVE_LAYOUT.varHandle(byte.class, groupElement("sec_properties_hi")).withInvokeExactBehavior();
         FRAME_TYPE_HANDLE = NATIVE_LAYOUT.varHandle(byte.class,groupElement("sec_frame_type")).withInvokeExactBehavior();
         WIDTH_HANDLE = NATIVE_LAYOUT.varHandle(int.class,groupElement("sec_width")).withInvokeExactBehavior();
         HEIGHT_HANDLE = NATIVE_LAYOUT.varHandle(int.class,groupElement("sec_height")).withInvokeExactBehavior();
@@ -48,17 +53,21 @@ public class SecondaryFrameInfo {
 
     private uint cmdTableOffset;
     private uint outlineTableOffset;
-    private int properties;
+    private int nul;
+    private short propertiesLo;
+    private byte propertiesHi;
     private ubyte frameType;
     private int width;
     private int height;
     private int hotspotX;
     private int hotspotY;
 
-    private SecondaryFrameInfo(uint cmdTableOffset, uint outlineTableOffset, int properties, ubyte frameType, int width, int height, int hotspotX, int hotspotY) {
+    private SecondaryFrameInfo(uint cmdTableOffset, uint outlineTableOffset, int nul, short propertiesLo, byte propertiesHi, ubyte frameType, int width, int height, int hotspotX, int hotspotY) {
         this.cmdTableOffset = cmdTableOffset;
         this.outlineTableOffset = outlineTableOffset;
-        this.properties = properties;
+        this.nul = nul;
+        this.propertiesLo = propertiesLo;
+        this.propertiesHi = propertiesHi;
         this.frameType = frameType;
         this.width = width;
         this.height = height;
@@ -70,13 +79,16 @@ public class SecondaryFrameInfo {
         data = data.asSlice(offset, NATIVE_SIZE);
         uint cmdTableOffset = new uint((int)CMD_TABLE_OFFSET_HANDLE.get(data));
         uint outlineTableOffset = new uint((int)OUTLINE_TABLE_OFFSET_HANDLE.get(data));
-        int properties = (int)PROPERTIES_HANDLE.get(data);
+        int nul = (int)NUL_HANDLE.get(data);
+        short propertiesLo = (short)PROPERTIES_LO_HANDLE.get(data);
+        byte propertiesHi = (byte)PROPERTIES_HI_HANDLE.get(data);
         ubyte frameType = new ubyte((byte)FRAME_TYPE_HANDLE.get(data));
         int width = (int)WIDTH_HANDLE.get(data);
         int height = (int)HEIGHT_HANDLE.get(data);
         int hotspotX = (int)HOTSPOT_X_HANDLE.get(data);
         int hotspotY = (int)HOTSPOT_Y_HANDLE.get(data);
-        return new SecondaryFrameInfo(cmdTableOffset, outlineTableOffset, properties, frameType, width, height, hotspotX, hotspotY);
+        assert(nul == 0 && propertiesLo == 0);
+        return new SecondaryFrameInfo(cmdTableOffset, outlineTableOffset, nul, propertiesLo, propertiesHi, frameType, width, height, hotspotX, hotspotY);
     }
 
     public Builder builder() {
@@ -91,7 +103,9 @@ public class SecondaryFrameInfo {
         data = data.asSlice(offset, NATIVE_SIZE);
         CMD_TABLE_OFFSET_HANDLE.set(data, this.cmdTableOffset.signed());
         OUTLINE_TABLE_OFFSET_HANDLE.set(data, this.outlineTableOffset.signed());
-        PROPERTIES_HANDLE.set(data, this.properties);
+        NUL_HANDLE.set(data, this.nul);
+        PROPERTIES_LO_HANDLE.set(data, this.propertiesLo);
+        PROPERTIES_HI_HANDLE.set(data, this.propertiesHi);
         FRAME_TYPE_HANDLE.set(data, this.frameType.signed());
         WIDTH_HANDLE.set(data, this.width);
         HEIGHT_HANDLE.set(data, this.height);
@@ -107,8 +121,12 @@ public class SecondaryFrameInfo {
         return this.outlineTableOffset.value();
     }
 
+    public int nul() {
+        return this.nul;
+    }
+
     public int properties() {
-        return this.properties;
+        return this.propertiesLo | (this.propertiesHi << 16);
     }
 
     public int frameType() {
@@ -138,7 +156,9 @@ public class SecondaryFrameInfo {
     public static class Builder {
         private uint cmdTableOffset;
         private uint outlineTableOffset;
-        private int properties;
+        private int nul;
+        private short propertiesLo;
+        private byte propertiesHi;
         private ubyte frameType;
         private int width;
         private int height;
@@ -149,7 +169,9 @@ public class SecondaryFrameInfo {
         private Builder(SecondaryFrameInfo frameInfo) {
             this.cmdTableOffset = frameInfo.cmdTableOffset;
             this.outlineTableOffset = frameInfo.outlineTableOffset;
-            this.properties = frameInfo.properties;
+            this.nul = frameInfo.nul;
+            this.propertiesLo = frameInfo.propertiesLo;
+            this.propertiesHi = frameInfo.propertiesHi;
             this.frameType = frameInfo.frameType;
             this.width = frameInfo.width;
             this.height = frameInfo.height;
@@ -167,8 +189,14 @@ public class SecondaryFrameInfo {
             return this;
         }
 
+        public Builder nul(int nul) {
+            this.nul = nul;
+            return this;
+        }
+
         public Builder properties(int properties) {
-            this.properties = properties;
+            this.propertiesLo = (short)(properties & 0xffff);
+            this.propertiesHi = (byte)(properties >>> 16);
             return this;
         }
 
@@ -198,7 +226,7 @@ public class SecondaryFrameInfo {
         }
 
         public SecondaryFrameInfo build() {
-            return new SecondaryFrameInfo(cmdTableOffset, outlineTableOffset, properties, frameType, width, height, hotspotX, hotspotY);
+            return new SecondaryFrameInfo(cmdTableOffset, outlineTableOffset, nul, propertiesLo, propertiesHi, frameType, width, height, hotspotX, hotspotY);
         }
     }
 }

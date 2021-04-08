@@ -8,6 +8,7 @@ import java.util.List;
 import io.github.merykitty.slpprocessor.misc.FrameSerializeRecord;
 import io.github.merykitty.slpprocessor.misc.uint;
 import io.github.merykitty.slpprocessor.misc.ushort;
+import jdk.incubator.foreign.MemoryAccess;
 import jdk.incubator.foreign.MemorySegment;
 
 import org.json.JSONArray;
@@ -37,7 +38,7 @@ public class Frame {
         this.commandList = commandList;
     }
 
-    public static Frame ofNativeData(MemorySegment data, FrameInfo frameInfo, Version version, PaletteContainer palettes) {
+    public static Frame ofNativeData(MemorySegment data, FrameInfo frameInfo, long nextFrameOffset, Version version, PaletteContainer palettes) {
         int height = frameInfo.height();
         long currentOffset = frameInfo.outlineTableOffset();
         assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
@@ -46,6 +47,9 @@ public class Frame {
             var frameRowEdge = FrameRowEdge.ofNativeData(data, currentOffset);
             frameRowEdgeList[i] = frameRowEdge;
             currentOffset += FrameRowEdge.nativeByteSize();
+        }
+        for (long i = currentOffset; i < frameInfo.cmdTableOffset(); i++) {
+            assert(MemoryAccess.getByteAtOffset(data, i) == 0);
         }
         currentOffset = frameInfo.cmdTableOffset();
         assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
@@ -72,6 +76,9 @@ public class Frame {
                     break;
                 }
             }
+        }
+        for (long i = currentOffset; i < nextFrameOffset; i++) {
+            assert(MemoryAccess.getByteAtOffset(data, i) == 0);
         }
         return new Frame(frameInfo, frameRowEdgeList, commandList);
     }

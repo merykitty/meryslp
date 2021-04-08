@@ -7,16 +7,10 @@ public enum SecFrameType {
     VFX_ALPHA;
 
     public ubyte value(ubyte input) {
-        return switch (this) {
-            case SHADOW -> new ubyte((byte) (~(input.value() << 2)));
-            case VFX_ALPHA -> input;
-        };
+        return input;
     }
 
     public ubyte reverse(ubyte input) {
-        return switch (this) {
-            case SHADOW -> new ubyte((byte)((~input.value() & 0xff) >>> 2));
-            case VFX_ALPHA -> input;
-        };
+        return input;
     }
 }

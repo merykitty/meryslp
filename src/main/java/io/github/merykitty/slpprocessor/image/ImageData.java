@@ -53,7 +53,7 @@ public class ImageData implements AutoCloseable {
         Objects.checkIndex(x, width);
         Objects.checkIndex(y, height);
         UNSAFE.putInt(dataAddress + (y * width + x) * PIXEL_SIZE, colour.toRGBA());
-//        MemoryAccess.setIntAtOffset(this.data, y * width + x, colour.toRGBA());
+//        MemoryAccess.setIntAtIndex(this.data, y * width + x, colour.toRGBA());
     }
 
     public RawColour readPixel(int x, int y, int width, int height) {
