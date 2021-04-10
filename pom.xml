@@ -17,14 +17,15 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <junit.version>4.13.2</junit.version>
+    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+    <maven.clean.followSymLinks>false</maven.clean.followSymLinks>
     <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-surefile-plugin.version>3.0.0-M5</maven-surefile-plugin.version>
     <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
-    <project.resource-basedir>${project.basedir}/src/main/resources/io/github/merykitty/slpprocessor</project.resource-basedir>
-    <project.output-basedir>${project.build.outputDirectory}/io/github/merykitty/slpprocessor</project.output-basedir>
-    <user.lib-directory>/usr/lib/x86_64-linux-gnu</user.lib-directory>
+    <project.resources.input>${project.basedir}/src/main/resources</project.resources.input>
+    <project.resources.output>${project.basedir}/resources</project.resources.output>
   </properties>
 
   <dependencies>
@@ -52,20 +53,75 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven-clean-plugin.version}</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>resources</directory>
+            </fileset>
+
+            <fileset>
+              <directory>target</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>${maven-resources-plugin.version}</version>
-        <configuration>
-          <outputDirectory>${project.output-basedir}</outputDirectory>
-          <resources>
-            <resource>
-              <directory>${project.resource-basedir}</directory>
-              <excludes>
-                <exclude>**/*.cpp</exclude>
-                <exclude>**/.vscode/**</exclude>
-              </excludes>
-            </resource>
-          </resources>
-        </configuration>
+        <executions>
+          <execution>
+            <id>default-resources</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.resources.output}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.resources.input}</directory>
+                  <excludes>
+                    <exclude>**/*.cpp</exclude>
+                    <exclude>**/.vscode/**</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>resources-decoder</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>install</phase>
+            <configuration>
+              <outputDirectory>${project.basedir}/target/SLPDecoder/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.resources.output}</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>resources-encoder</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>install</phase>
+            <configuration>
+              <outputDirectory>${project.basedir}/target/SLPEncoder/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.resources.output}</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -91,12 +147,6 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>${maven-install-plugin.version}</version>
-      </plugin>
-
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec-maven-plugin.version}</version>
@@ -115,7 +165,7 @@
                 <argument>-fPIC</argument>
                 <argument>-o</argument>
                 <argument>${java.io.tmpdir}/pngutils.o</argument>
-                <argument>${project.resource-basedir}/image/pngutils.cpp</argument>
+                <argument>${project.resources.input}/pngutils.cpp</argument>
               </arguments>
             </configuration>
           </execution>
@@ -132,9 +182,9 @@
                 <argument>-O3</argument>
                 <argument>-shared</argument>
                 <argument>-o</argument>
-                <argument>${project.output-basedir}/image/pngutils.so</argument>
+                <argument>${project.resources.output}/pngutils.so</argument>
                 <argument>${java.io.tmpdir}/pngutils.o</argument>
-                <argument>-Wl,-rpath=${user.lib-directory}</argument>
+                <argument>-Wl,-rpath=./</argument>
                 <argument>-lpng</argument>
               </arguments>
             </configuration>
@@ -145,18 +195,49 @@
             <goals>
               <goal>exec</goal>
             </goals>
-            <phase>install</phase>
+            <phase>package</phase>
             <configuration>
               <executable>jpackage</executable>
               <arguments>
+                <argument>-t</argument>
+                <argument>app-image</argument>
                 <argument>--java-options</argument>
                 <argument>"-Dforeign.restricted=permit -XX:+UseParallelGC -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields"</argument>
+                <argument>-d</argument>
+                <argument>./target</argument>
                 <argument>-n</argument>
                 <argument>SLPDecoder</argument>
                 <argument>-p</argument>
-                <classpath/>
+                <modulepath/>
                 <argument>-m</argument>
                 <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.SLPDecoder</argument>
+                <argument>--verbose</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>create-encoder</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <executable>jpackage</executable>
+              <arguments>
+                <argument>-t</argument>
+                <argument>app-image</argument>
+                <argument>--java-options</argument>
+                <argument>"-Dforeign.restricted=permit -XX:+UseParallelGC -XX:CompileThreshold=1000 -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields"</argument>
+                <argument>-d</argument>
+                <argument>./target</argument>
+                <argument>-n</argument>
+                <argument>SLPEncoder</argument>
+                <argument>-p</argument>
+                <modulepath/>
+                <argument>-m</argument>
+                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.SLPEncoder</argument>
+                <argument>--verbose</argument>
               </arguments>
             </configuration>
           </execution>
@@ -169,13 +250,15 @@
             <configuration>
               <executable>java</executable>
               <arguments>
+                <argument>--add-modules</argument>
+                <argument>jdk.incubator.foreign</argument>
                 <argument>-Dforeign.restricted=permit</argument>
                 <argument>-XX:CompileThreshold=1000</argument>
                 <argument>-XX:+UseParallelGC</argument>
                 <argument>-XX:+UnlockDiagnosticVMOptions</argument>
                 <argument>-XX:+UnlockExperimentalVMOptions</argument>
                 <argument>-XX:+TrustFinalNonStaticFields</argument>
-                <argument>-XX:StartFlightRecording:duration=300s,filename=profile.jfr,delay=10s,settings=strict.jfc</argument>
+                <argument>-XX:StartFlightRecording:duration=600s,filename=profile.jfr,delay=30s,settings=strict.jfc</argument>
                 <argument>-ea</argument>
                 <argument>-p</argument>
                 <classpath/>

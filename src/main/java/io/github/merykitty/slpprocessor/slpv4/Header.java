@@ -1,6 +1,8 @@
 package io.github.merykitty.slpprocessor.slpv4;
 
 import java.lang.invoke.VarHandle;
+import java.nio.charset.StandardCharsets;
+
 import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemorySegment;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
@@ -29,7 +31,6 @@ public class Header {
 
     private static final long NATIVE_SIZE = NATIVE_LAYOUT.byteSize();
 
-    private static final VarHandle VERSION_HANDLE;
     private static final VarHandle NUM_FRAMES_HANDLE;
     private static final VarHandle TYPE_HANDLE;
     private static final VarHandle NUM_DIRECTIONS_HANDLE;
@@ -39,7 +40,6 @@ public class Header {
     private static final VarHandle OFFSET_SECONDARY_HANDLE;
 
     static {
-        VERSION_HANDLE = NATIVE_LAYOUT.varHandle(byte.class, groupElement("version"), sequenceElement(0, 1)).withInvokeExactBehavior();
         NUM_FRAMES_HANDLE = NATIVE_LAYOUT.varHandle(short.class, groupElement("num_frames")).withInvokeExactBehavior();
         TYPE_HANDLE = NATIVE_LAYOUT.varHandle(short.class, groupElement("type")).withInvokeExactBehavior();
         NUM_DIRECTIONS_HANDLE = NATIVE_LAYOUT.varHandle(short.class, groupElement("num_directions")).withInvokeExactBehavior();
@@ -96,10 +96,7 @@ public class Header {
 
     public void toNativeData(MemorySegment data, long offset) {
         data = data.asSlice(offset, NATIVE_SIZE);
-        VERSION_HANDLE.set(data, 0L, (byte)(this.version.major() + '0'));
-        VERSION_HANDLE.set(data, 1L, (byte)('.'));
-        VERSION_HANDLE.set(data, 2L, (byte)(this.version.minor() + '0'));
-        VERSION_HANDLE.set(data, 3L, (byte)(this.version.release() - 'a' + 'A'));
+        data.asSlice(VERSION_OFFSET, VERSION_SIZE).copyFrom(MemorySegment.ofArray(version.toString().toUpperCase().getBytes(StandardCharsets.US_ASCII)));
         NUM_FRAMES_HANDLE.set(data, this.numFrames);
         TYPE_HANDLE.set(data, this.type);
         NUM_DIRECTIONS_HANDLE.set(data, this.numDirections);

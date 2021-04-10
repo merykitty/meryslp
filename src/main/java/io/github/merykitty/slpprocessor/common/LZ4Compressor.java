@@ -14,7 +14,7 @@ public class LZ4Compressor {
 
     static {
         try {
-            var lib = LibraryLookup.ofPath(Path.of(LZ4Compressor.class.getResource("liblz4.so").toURI()));
+            var lib = LibraryLookup.ofPath(Path.of("./resources/liblz4.so"));
             var compressSymbol = lib.lookup("LZ4_compress_default").get();
             var decompressSymbol = lib.lookup("LZ4_decompress_safe").get();
             var compressBoundSymbol = lib.lookup("LZ4_compressBound").get();

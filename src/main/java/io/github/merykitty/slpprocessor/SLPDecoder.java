@@ -12,7 +12,7 @@ import io.github.merykitty.slpprocessor.image.Palette;
 import io.github.merykitty.slpprocessor.image.PaletteContainer;
 
 public class SLPDecoder {
-    private static final Path CONFIG_FILE = Path.of(Palette.class.getResource("aoe1-config.json").getPath());
+    private static final Path CONFIG_FILE = Path.of("./resources/aoe1-config.json");
     private static final Path PALETTE_FOLDER = Path.of("Assets/Palettes");
 
     public static void main(String[] args) {
@@ -23,8 +23,8 @@ public class SLPDecoder {
                 .help("The folder in which slp files are extracted");
         parser.addArgument("-o", "--output")
                 .help("The folder in which output files will be stored");
-        parser.addArgument("-h", "--home")
-                .help("The home folder of AoE DE, often under Steam/steamapps/common/AoEDE");
+        parser.addArgument("-r", "--root")
+                .help("The root directory of AoE DE, often under Steam/steamapps/common/AoEDE");
         Namespace ns;
         try {
             ns = parser.parseArgs(args);
@@ -32,7 +32,7 @@ public class SLPDecoder {
             System.out.println("Incorrect command line format");
             return;
         }
-        var paletteFolder = Path.of(ns.getString("home")).resolve(PALETTE_FOLDER);
+        var paletteFolder = Path.of(ns.getString("root")).resolve(PALETTE_FOLDER);
         var inputFolder = Path.of(ns.getString("input"));
         var outputFolder = Path.of(ns.getString("output"));
         try {

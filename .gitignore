@@ -1,4 +1,5 @@
 target/
+resources/
 slp-processor.iml
 .idea/
 *.so

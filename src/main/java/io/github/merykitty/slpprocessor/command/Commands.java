@@ -365,7 +365,11 @@ public class Commands {
                 return new SecGreaterDraw(artboard, startX, endX, y);
             }
         } else if (type == SecPixelType.MAIN_FILL) {
-            return new SecFill(artboard, startX, endX, y);
+            if (endX - startX < LESSER_THRESHOLD) {
+                return new SecLesserDraw(artboard, startX, endX, y);
+            } else {
+                return new SecGreaterDraw(artboard, startX, endX, y);
+            }
         } else if (type == SecPixelType.SKIP) {
             if (endX - startX < LESSER_THRESHOLD) {
                 return new SecLesserSkip(artboard, startX, endX, y);

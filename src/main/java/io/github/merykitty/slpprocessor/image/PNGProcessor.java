@@ -27,7 +27,7 @@ public class PNGProcessor {
 
     static {
         try {
-            var lib = LibraryLookup.ofPath(Path.of(PNGProcessor.class.getResource("pngutils.so").toURI()));
+            var lib = LibraryLookup.ofPath(Path.of("./resources/pngutils.so"));
             var readSymbol = lib.lookup("png_read").get();
             var writeSymbol = lib.lookup("png_write").get();
             PNG_READ_HANDLE = CLinker.getInstance().downcallHandle(readSymbol,
@@ -44,8 +44,10 @@ public class PNGProcessor {
     }
 
     public static Image pngRead(Path path) throws IOException {
+        var pathString = path.toString();
         try (var meta = MemorySegment.mapFile(path, 0, HEIGHT_OFFSET + INT_SIZE, FileChannel.MapMode.READ_ONLY);
-                var cPath = CLinker.toCString(path.toString(), StandardCharsets.US_ASCII)) {
+                var cPath = MemorySegment.allocateNative(pathString.length() + 1)) {
+            cPath.copyFrom(MemorySegment.ofArray(pathString.getBytes(StandardCharsets.US_ASCII)));
             long signature = MemoryAccess.getLongAtOffset(meta, 0, ByteOrder.BIG_ENDIAN);
             assert(signature == SIGNATURE_BUG_ENDIAN);
             int width = MemoryAccess.getIntAtOffset(meta, WIDTH_OFFSET, ByteOrder.BIG_ENDIAN);
@@ -64,7 +66,9 @@ public class PNGProcessor {
     }
 
     public static void pngWrite(Path path, Image image) {
-        try (var cPath = CLinker.toCString(path.toString())) {
+        var pathString = path.toString();
+        try (var cPath = MemorySegment.allocateNative(pathString.length() + 1)) {
+            cPath.copyFrom(MemorySegment.ofArray(pathString.getBytes(StandardCharsets.US_ASCII)));
             int result = (int)PNG_WRITE_HANDLE.invokeExact(cPath.address(), image.width(), image.height(), image.data().address());
             assert(result == 0);
         } catch (Throwable e) {

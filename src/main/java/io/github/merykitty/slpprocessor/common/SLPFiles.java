@@ -61,7 +61,7 @@ public class SLPFiles {
         if (version.major() == 4) {
             return SLPFileVer4.importGraphics(meta, importFolder, palettes);
         } else {
-            throw new AssertionError();
+            return SLPFileVer3.importGraphics(meta, importFolder, palettes);
         }
     }
 
@@ -79,7 +79,7 @@ public class SLPFiles {
             int versionMajor = version.major();
             int versionMinor = version.minor();
             if (versionMajor < 4) {
-                return new SLPFileVer3(data, palettes);
+                return SLPFileVer3.ofNativeData(data, palettes);
             } else if (versionMajor == 4) {
                 if (!maybeCompressed) {
                     return SLPFileVer4.ofNativeData(data, palettes);

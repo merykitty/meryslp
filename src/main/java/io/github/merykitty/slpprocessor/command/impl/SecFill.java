@@ -77,7 +77,7 @@ public class SecFill implements SecondaryCommand {
     @Override
     public void toNative(MemorySegment data, long offset, SecFrameType type) {
         if (this.commandLength == 1) {
-            MemoryAccess.setByteAtOffset(data, offset, (byte)(this.length << 4 | 0x07));
+            MemoryAccess.setByteAtOffset(data, offset, (byte)((this.length << 4) | 0x07));
         } else {
             MemoryAccess.setByteAtOffset(data, offset, (byte)(0x07));
             MemoryAccess.setByteAtOffset(data, offset + 1, (byte)this.length);

@@ -37,7 +37,6 @@ public class SLPFileVer4 implements SLPFile {
         var version = header.version();
         int numFrames = header.numFrames();
         currentOffset = header.offsetMain();
-        assert(currentOffset == 0x20);
         assert((currentOffset & 0x0f) == 0);
         var frameInfoList = new FrameInfo[numFrames];
         for (int i = 0; i < numFrames; i++) {

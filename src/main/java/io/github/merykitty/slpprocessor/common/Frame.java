@@ -41,7 +41,6 @@ public class Frame {
     public static Frame ofNativeData(MemorySegment data, FrameInfo frameInfo, long nextFrameOffset, Version version, PaletteContainer palettes) {
         int height = frameInfo.height();
         long currentOffset = frameInfo.outlineTableOffset();
-        assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
         var frameRowEdgeList = new FrameRowEdge[height];
         for (int i = 0; i < height; i++) {
             var frameRowEdge = FrameRowEdge.ofNativeData(data, currentOffset);
@@ -52,7 +51,6 @@ public class Frame {
             assert(MemoryAccess.getByteAtOffset(data, i) == 0);
         }
         currentOffset = frameInfo.cmdTableOffset();
-        assert((currentOffset & 0x0f) == 0) : ("Misaligned offset: " + currentOffset);
         var commandOffsetList = new CommandOffset[height];
         for (int i = 0; i < height; i++) {
             var commandOffset = CommandOffset.ofNativeData(data, currentOffset);
