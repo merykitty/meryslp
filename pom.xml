@@ -25,6 +25,7 @@
     <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
     <project.resources.input>${project.basedir}/src/main/resources</project.resources.input>
+    <project.resources.input.common>${project.resources.input}/common</project.resources.input.common>
     <project.resources.output>${project.basedir}/resources</project.resources.output>
   </properties>
 
@@ -75,19 +76,7 @@
         <executions>
           <execution>
             <id>default-resources</id>
-            <phase>process-resources</phase>
-            <configuration>
-              <outputDirectory>${project.resources.output}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.resources.input}</directory>
-                  <excludes>
-                    <exclude>**/*.cpp</exclude>
-                    <exclude>**/.vscode/**</exclude>
-                  </excludes>
-                </resource>
-              </resources>
-            </configuration>
+            <phase>none</phase>
           </execution>
 
           <execution>
@@ -95,7 +84,7 @@
             <goals>
               <goal>copy-resources</goal>
             </goals>
-            <phase>install</phase>
+            <phase>package</phase>
             <configuration>
               <outputDirectory>${project.basedir}/target/SLPDecoder/resources</outputDirectory>
               <resources>
@@ -111,7 +100,7 @@
             <goals>
               <goal>copy-resources</goal>
             </goals>
-            <phase>install</phase>
+            <phase>package</phase>
             <configuration>
               <outputDirectory>${project.basedir}/target/SLPEncoder/resources</outputDirectory>
               <resources>
@@ -128,11 +117,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
-        <configuration>
-          <compilerArgs>
-
-          </compilerArgs>
-        </configuration>
       </plugin>
 
       <plugin>
@@ -151,58 +135,25 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec-maven-plugin.version}</version>
         <executions>
-          <execution>
-            <id>compile-png</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>process-resources</phase>
-            <configuration>
-              <executable>g++</executable>
-              <arguments>
-                <argument>-O3</argument>
-                <argument>-c</argument>
-                <argument>-fPIC</argument>
-                <argument>-o</argument>
-                <argument>${java.io.tmpdir}/pngutils.o</argument>
-                <argument>${project.resources.input}/pngutils.cpp</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>link-png</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>process-resources</phase>
-            <configuration>
-              <executable>g++</executable>
-              <arguments>
-                <argument>-O3</argument>
-                <argument>-shared</argument>
-                <argument>-o</argument>
-                <argument>${project.resources.output}/pngutils.so</argument>
-                <argument>${java.io.tmpdir}/pngutils.o</argument>
-                <argument>-Wl,-rpath=./</argument>
-                <argument>-lpng</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
-          <execution>
+            <execution>
             <id>create-decoder</id>
             <goals>
               <goal>exec</goal>
             </goals>
-            <phase>package</phase>
+            <phase>prepare-package</phase>
             <configuration>
               <executable>jpackage</executable>
               <arguments>
                 <argument>-t</argument>
                 <argument>app-image</argument>
                 <argument>--java-options</argument>
-                <argument>"-Dforeign.restricted=permit -XX:+UseParallelGC -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields"</argument>
+                <argument>"-Dforeign.restricted=permit"</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+UseParallelGC</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+UnlockExperimentalVMOptions</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+TrustFinalNonStaticFields"</argument>
                 <argument>-d</argument>
                 <argument>./target</argument>
                 <argument>-n</argument>
@@ -221,14 +172,20 @@
             <goals>
               <goal>exec</goal>
             </goals>
-            <phase>package</phase>
+            <phase>prepare-package</phase>
             <configuration>
               <executable>jpackage</executable>
               <arguments>
                 <argument>-t</argument>
                 <argument>app-image</argument>
                 <argument>--java-options</argument>
-                <argument>"-Dforeign.restricted=permit -XX:+UseParallelGC -XX:CompileThreshold=1000 -XX:+UnlockExperimentalVMOptions -XX:+TrustFinalNonStaticFields"</argument>
+                <argument>"-Dforeign.restricted=permit"</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+UseParallelGC</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+UnlockExperimentalVMOptions</argument>
+                <argument>--java-options</argument>
+                <argument>-XX:+TrustFinalNonStaticFields"</argument>
                 <argument>-d</argument>
                 <argument>./target</argument>
                 <argument>-n</argument>
@@ -249,6 +206,9 @@
             </goals>
             <configuration>
               <executable>java</executable>
+              <environmentVariables>
+                <HOME_DIR>${project.basedir}</HOME_DIR>
+              </environmentVariables>
               <arguments>
                 <argument>--add-modules</argument>
                 <argument>jdk.incubator.foreign</argument>
@@ -272,4 +232,161 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>platform-unix-x64</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+        <project.resources.input.unix-x64>${project.resources.input}/unix-x64</project.resources.input.unix-x64>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>${maven-resources-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>process-resouces-unix-x64</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <outputDirectory>${project.resources.output}</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.resources.input.common}</directory>
+                      <excludes>
+                        <exclude>**/*.cpp</exclude>
+                        <exclude>**/.vscode/**</exclude>
+                      </excludes>
+                    </resource>
+
+                    <resource>
+                      <directory>${project.resources.input.unix-x64}</directory>
+                      <excludes>
+                        <exclude>**/*.cpp</exclude>
+                        <exclude>**/.vscode/**</exclude>
+                      </excludes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>compile-png-unix-x64</id>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <executable>g++</executable>
+                  <arguments>
+                    <argument>-O3</argument>
+                    <argument>-c</argument>
+                    <argument>-fPIC</argument>
+                    <argument>-o</argument>
+                    <argument>${java.io.tmpdir}/pngutils.o</argument>
+                    <argument>${project.resources.input.common}/pngutils.cpp</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>link-png-unix-x64</id>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <executable>g++</executable>
+                  <arguments>
+                    <argument>-O3</argument>
+                    <argument>-shared</argument>
+                    <argument>-o</argument>
+                    <argument>${project.resources.output}/pngutils.so</argument>
+                    <argument>${java.io.tmpdir}/pngutils.o</argument>
+                    <argument>-Wl,-rpath=./</argument>
+                    <argument>-lpng</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>platform-windows-x64</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <project.resources.input.windows-x64>${project.resources.input}/windows-x64</project.resources.input.windows-x64>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>${maven-resources-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>process-resouces-windows-x64</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>process-resources</phase>
+                <configuration>
+                  <outputDirectory>${project.resources.output}</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.resources.input.common}</directory>
+                      <excludes>
+                        <exclude>**/*.cpp</exclude>
+                        <exclude>**/.vscode/**</exclude>
+                      </excludes>
+                    </resource>
+
+                    <resource>
+                      <directory>${project.resources.input.windows-x64}</directory>
+                      <excludes>
+                        <exclude>**/*.cpp</exclude>
+                        <exclude>**/.vscode/**</exclude>
+                      </excludes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

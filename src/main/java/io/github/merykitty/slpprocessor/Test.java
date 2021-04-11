@@ -7,21 +7,25 @@ import java.nio.file.Path;
 import io.github.merykitty.slpprocessor.common.SLPFiles;
 import io.github.merykitty.slpprocessor.image.Palette;
 import io.github.merykitty.slpprocessor.image.PaletteContainer;
+import io.github.merykitty.slpprocessor.misc.HomeDirectoryResolver;
 
 public class Test {
-    private static final Path PALETTE_FOLDER = Path.of("/mnt/c/Program Files (x86)/Steam/steamapps/common/AoEDE/Assets/Palettes");
-    private static final Path CONFIG_FILE = Path.of("./aoe1-config.json");
-    private static final Path DECODE_INPUT_FOLDER = Path.of("./data/decode-input");
-    private static final Path DECODE_OUTPUT_FOLDER = Path.of("./data/decode-output");
-    private static final Path ENCODE_INPUT_FOLDER = Path.of("./data/encode-input");
-    private static final Path ENCODE_OUTPUT_FOLDER = Path.of("./data/encode-output");
+    private static final Path HOME_DIR = HomeDirectoryResolver.homeDir();
+    private static final Path PALETTE_FOLDER = HOME_DIR.resolve("resources/palettes");
+    private static final Path CONFIG_FILE = HOME_DIR.resolve("resources/aoe1-config.json");
+    private static final Path DECODE_INPUT_FOLDER = HOME_DIR.resolve("data/decoder-input");
+    private static final Path DECODE_OUTPUT_FOLDER = HOME_DIR.resolve("data/decoder-output");
+    private static final Path ENCODE_INPUT_FOLDER = HOME_DIR.resolve("data/encoder-input");
+    private static final Path ENCODE_OUTPUT_FOLDER = HOME_DIR.resolve("data/encoder-output");
 
     public static void main(String[] args) throws IOException {
 //        var palettes = new PaletteContainer(CONFIG_FILE, PALETTE_FOLDER);
 //        var files = Files.list(DECODE_INPUT_FOLDER);
 //        files.filter(Files::isRegularFile)
 //                .forEach(path -> selfDecode(path, palettes));
+        System.out.println(System.getProperty("os.arch"));
         decode();
+
     }
 
     private static void decode() throws IOException {

@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.nio.file.Path;
 
+import io.github.merykitty.slpprocessor.misc.HomeDirectoryResolver;
 import jdk.incubator.foreign.*;
 import static jdk.incubator.foreign.CLinker.*;
 
@@ -14,7 +15,7 @@ public class LZ4Compressor {
 
     static {
         try {
-            var lib = LibraryLookup.ofPath(Path.of("./resources/liblz4.so"));
+            var lib = LibraryLookup.ofPath(HomeDirectoryResolver.homeDir().resolve("resources/liblz4.so"));
             var compressSymbol = lib.lookup("LZ4_compress_default").get();
             var decompressSymbol = lib.lookup("LZ4_decompress_safe").get();
             var compressBoundSymbol = lib.lookup("LZ4_compressBound").get();

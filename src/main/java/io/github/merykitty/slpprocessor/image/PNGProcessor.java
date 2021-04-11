@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import io.github.merykitty.slpprocessor.misc.HomeDirectoryResolver;
 import io.github.merykitty.slpprocessor.misc.Image;
 import jdk.incubator.foreign.*;
 import static jdk.incubator.foreign.CLinker.C_INT;
@@ -27,7 +28,7 @@ public class PNGProcessor {
 
     static {
         try {
-            var lib = LibraryLookup.ofPath(Path.of("./resources/pngutils.so"));
+            var lib = LibraryLookup.ofPath(HomeDirectoryResolver.homeDir().resolve("resources/pngutils.so"));
             var readSymbol = lib.lookup("png_read").get();
             var writeSymbol = lib.lookup("png_write").get();
             PNG_READ_HANDLE = CLinker.getInstance().downcallHandle(readSymbol,
