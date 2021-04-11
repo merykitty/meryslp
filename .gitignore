@@ -3,6 +3,5 @@
 /data/
 /slp-processor.iml
 /.idea/
-*.so
 *.jfr
 *.jfc
