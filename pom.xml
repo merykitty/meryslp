@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.merykitty</groupId>
-  <artifactId>slp-processor</artifactId>
+  <artifactId>meryslp</artifactId>
   <version>0.0.1</version>
 
-  <name>slp-processor</name>
+  <name>meryslp</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
@@ -27,6 +27,7 @@
     <project.resources.input>${project.basedir}/src/main/resources</project.resources.input>
     <project.resources.input.common>${project.resources.input}/common</project.resources.input.common>
     <project.resources.output>${project.basedir}/resources</project.resources.output>
+    <user.exec.name>MerySLP</user.exec.name>
   </properties>
 
   <dependencies>
@@ -67,7 +68,7 @@
             </fileset>
 
             <fileset>
-              <directory>SLPProcessor</directory>
+              <directory>${user.exec.name}</directory>
             </fileset>
           </filesets>
         </configuration>
@@ -90,12 +91,13 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <outputDirectory>${project.basedir}/SLPProcessor/resources</outputDirectory>
+              <outputDirectory>${project.basedir}/${user.exec.name}/resources</outputDirectory>
               <resources>
                 <resource>
                   <directory>${project.resources.output}</directory>
                   <excludes>
                     <exclude>*.properties</exclude>
+                    <exclude>*.ico</exclude>
                   </excludes>
                   <filtering>false</filtering>
                 </resource>
@@ -145,11 +147,11 @@
                 <argument>-d</argument>
                 <argument>${project.basedir}</argument>
                 <argument>-n</argument>
-                <argument>SLPProcessor</argument>
+                <argument>${user.exec.name}</argument>
                 <argument>-p</argument>
                 <modulepath/>
                 <argument>-m</argument>
-                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.Info</argument>
+                <argument>io.github.merykitty.meryslp/io.github.merykitty.meryslp.Info</argument>
                 <argument>--add-launcher</argument>
                 <argument>SLPDecoder=${project.resources.output}/decoder.properties</argument>
                 <argument>--add-launcher</argument>
@@ -186,7 +188,7 @@
                 <classpath/>
                 <argument>-cp</argument>
                 <classpath/>
-                <argument>io.github.merykitty.slpprocessor.Test</argument>
+                <argument>io.github.merykitty.meryslp.Test</argument>
               </arguments>
             </configuration>
           </execution>
