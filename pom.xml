@@ -94,6 +94,9 @@
               <resources>
                 <resource>
                   <directory>${project.resources.output}</directory>
+                  <excludes>
+                    <exclude>*.properties</exclude>
+                  </excludes>
                   <filtering>false</filtering>
                 </resource>
               </resources>
@@ -107,8 +110,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
+          <source>17</source>
+          <target>17</target>
         </configuration>
       </plugin>
 
@@ -129,7 +132,7 @@
         <version>${exec-maven-plugin.version}</version>
         <executions>
             <execution>
-            <id>create-decoder</id>
+            <id>create-executable</id>
             <goals>
               <goal>exec</goal>
             </goals>
@@ -139,55 +142,16 @@
               <arguments>
                 <argument>-t</argument>
                 <argument>app-image</argument>
-                <argument>--java-options</argument>
-                <argument>-Dforeign.restricted=permit</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+UseParallelGC</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+UnlockExperimentalVMOptions</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+TrustFinalNonStaticFields</argument>
                 <argument>-d</argument>
-                <argument>${project.build.directory}</argument>
+                <argument>${project.basedir}</argument>
                 <argument>-n</argument>
-                <argument>SLPDecoder</argument>
+                <argument>SLPProcessor</argument>
                 <argument>-p</argument>
                 <modulepath/>
-                <argument>-m</argument>
-                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.SLPDecoder</argument>
-                <argument>--verbose</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>create-encoder</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <executable>jpackage</executable>
-              <arguments>
-                <argument>-t</argument>
-                <argument>app-image</argument>
-                <argument>--java-options</argument>
-                <argument>-Dforeign.restricted=permit</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+UseParallelGC</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+UnlockExperimentalVMOptions</argument>
-                <argument>--java-options</argument>
-                <argument>-XX:+TrustFinalNonStaticFields</argument>
-                <argument>-d</argument>
-                <argument>${project.build.directory}</argument>
-                <argument>-n</argument>
-                <argument>SLPEncoder</argument>
-                <argument>-p</argument>
-                <modulepath/>
-                <argument>-m</argument>
-                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.SLPEncoder</argument>
-                <argument>--verbose</argument>
+                <argument>--add-launcher</argument>
+                <argument>SLPDecoder=${project.resources.output}/decoder.properties</argument>
+                <argument>--add-launcher</argument>
+                <argument>SLPEncoder=${project.resources.output}/encoder.properties</argument>
               </arguments>
             </configuration>
           </execution>
@@ -319,27 +283,6 @@
                   </arguments>
                 </configuration>
               </execution>
-
-              <execution>
-                <id>package-copy-exe-unix-x64</id>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                  <executable>cp</executable>
-                  <arguments>
-                    <argument>-r</argument>
-                    <argument>-n</argument>
-                    <argument>-t</argument>
-                    <argument>${project.basedir}/SLPProcessor</argument>
-                    <argument>${project.build.directory}/SLPDecoder/bin</argument>
-                    <argument>${project.build.directory}/SLPDecoder/lib</argument>
-                    <argument>${project.build.directory}/SLPEncoder/bin</argument>
-                    <argument>${project.build.directory}/SLPEncoder/lib</argument>
-                  </arguments>
-                </configuration>
-              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -388,26 +331,6 @@
                         <exclude>**/.vscode/**</exclude>
                       </excludes>
                       <filtering>false</filtering>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>package-copy-exe-windows-x64</id>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                  <outputDirectory>${project.basedir}/SLPProcessor</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>${project.build.directory}/SLPDecoder</directory>
-                    </resource>
-
-                    <resource>
-                      <directory>${project.build.directory}/SLPEncoder</directory>
                     </resource>
                   </resources>
                 </configuration>
