@@ -330,6 +330,7 @@
                   <executable>cp</executable>
                   <arguments>
                     <argument>-r</argument>
+                    <argument>-n</argument>
                     <argument>-t</argument>
                     <argument>${project.basedir}/SLPProcessor</argument>
                     <argument>${project.build.directory}/SLPDecoder/bin</argument>
