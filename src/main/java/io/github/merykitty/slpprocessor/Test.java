@@ -5,12 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.github.merykitty.slpprocessor.common.SLPFiles;
-import io.github.merykitty.slpprocessor.image.Palette;
 import io.github.merykitty.slpprocessor.image.PaletteContainer;
-import io.github.merykitty.slpprocessor.misc.HomeDirectoryResolver;
+import io.github.merykitty.slpprocessor.misc.EnvironmentResolver;
 
 public class Test {
-    private static final Path HOME_DIR = HomeDirectoryResolver.homeDir();
+    private static final Path HOME_DIR = EnvironmentResolver.homeDir();
     private static final Path PALETTE_FOLDER = HOME_DIR.resolve("resources/palettes");
     private static final Path CONFIG_FILE = HOME_DIR.resolve("resources/aoe1-config.json");
     private static final Path DECODE_INPUT_FOLDER = HOME_DIR.resolve("data/decoder-input");

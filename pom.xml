@@ -65,6 +65,10 @@
             <fileset>
               <directory>target</directory>
             </fileset>
+
+            <fileset>
+              <directory>SLPProcessor</directory>
+            </fileset>
           </filesets>
         </configuration>
       </plugin>
@@ -80,29 +84,33 @@
           </execution>
 
           <execution>
-            <id>resources-decoder</id>
+            <id>processor-packaged</id>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <phase>package</phase>
             <configuration>
-              <outputDirectory>${project.basedir}/target/SLPDecoder/resources</outputDirectory>
+              <outputDirectory>${project.basedir}/SLPProcessor</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.resources.output}</directory>
+                  <directory>${project.build.directory}/SLPDecoder</directory>
+                </resource>
+
+                <resource>
+                  <directory>${project.build.directory}/SLPEncoder</directory>
                 </resource>
               </resources>
             </configuration>
           </execution>
 
           <execution>
-            <id>resources-encoder</id>
+            <id>processor-resources</id>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <phase>package</phase>
             <configuration>
-              <outputDirectory>${project.basedir}/target/SLPEncoder/resources</outputDirectory>
+              <outputDirectory>${project.basedir}/SLPProcessor/resources</outputDirectory>
               <resources>
                 <resource>
                   <directory>${project.resources.output}</directory>
@@ -117,6 +125,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -147,15 +159,15 @@
                 <argument>-t</argument>
                 <argument>app-image</argument>
                 <argument>--java-options</argument>
-                <argument>"-Dforeign.restricted=permit"</argument>
+                <argument>-Dforeign.restricted=permit</argument>
                 <argument>--java-options</argument>
                 <argument>-XX:+UseParallelGC</argument>
                 <argument>--java-options</argument>
                 <argument>-XX:+UnlockExperimentalVMOptions</argument>
                 <argument>--java-options</argument>
-                <argument>-XX:+TrustFinalNonStaticFields"</argument>
+                <argument>-XX:+TrustFinalNonStaticFields</argument>
                 <argument>-d</argument>
-                <argument>./target</argument>
+                <argument>${project.build.directory}</argument>
                 <argument>-n</argument>
                 <argument>SLPDecoder</argument>
                 <argument>-p</argument>
@@ -179,15 +191,15 @@
                 <argument>-t</argument>
                 <argument>app-image</argument>
                 <argument>--java-options</argument>
-                <argument>"-Dforeign.restricted=permit"</argument>
+                <argument>-Dforeign.restricted=permit</argument>
                 <argument>--java-options</argument>
                 <argument>-XX:+UseParallelGC</argument>
                 <argument>--java-options</argument>
                 <argument>-XX:+UnlockExperimentalVMOptions</argument>
                 <argument>--java-options</argument>
-                <argument>-XX:+TrustFinalNonStaticFields"</argument>
+                <argument>-XX:+TrustFinalNonStaticFields</argument>
                 <argument>-d</argument>
-                <argument>./target</argument>
+                <argument>${project.build.directory}</argument>
                 <argument>-n</argument>
                 <argument>SLPEncoder</argument>
                 <argument>-p</argument>
@@ -374,15 +386,6 @@
                   </resources>
                 </configuration>
               </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>${exec-maven-plugin.version}</version>
-            <executions>
-
             </executions>
           </plugin>
         </plugins>

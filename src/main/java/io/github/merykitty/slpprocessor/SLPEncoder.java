@@ -1,16 +1,14 @@
 package io.github.merykitty.slpprocessor;
 
 import io.github.merykitty.slpprocessor.common.SLPFiles;
-import io.github.merykitty.slpprocessor.image.Palette;
 import io.github.merykitty.slpprocessor.image.PaletteContainer;
-import io.github.merykitty.slpprocessor.misc.HomeDirectoryResolver;
+import io.github.merykitty.slpprocessor.misc.EnvironmentResolver;
 import io.github.merykitty.slpprocessor.misc.PrimitiveOptional;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -38,16 +36,16 @@ public class SLPEncoder {
             return;
         }
 
-        var configFile = HomeDirectoryResolver.homeDir().resolve(DEFAULT_CONFIG_FILE);
+        var configFile = EnvironmentResolver.homeDir().resolve(DEFAULT_CONFIG_FILE);
         var paletteFolder = PrimitiveOptional.ofNullable(ns.getString("palettes"))
                 .map(Path::of)
-                .orElse(HomeDirectoryResolver.homeDir().resolve(DEFAULT_PALETTE_FOLDER));
+                .orElse(EnvironmentResolver.homeDir().resolve(DEFAULT_PALETTE_FOLDER));
         var inputFolder = PrimitiveOptional.ofNullable(ns.getString("input"))
                 .map(Path::of)
-                .orElse(HomeDirectoryResolver.homeDir().resolve(DEFAULT_INPUT_FOLDER));
+                .orElse(EnvironmentResolver.homeDir().resolve(DEFAULT_INPUT_FOLDER));
         var outputFolder = PrimitiveOptional.ofNullable(ns.getString("output"))
                 .map(Path::of)
-                .orElse(HomeDirectoryResolver.homeDir().resolve(DEFAULT_OUTPUT_FOLDER));
+                .orElse(EnvironmentResolver.homeDir().resolve(DEFAULT_OUTPUT_FOLDER));
 
         try {
             var palettes = new PaletteContainer(configFile, paletteFolder);
