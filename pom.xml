@@ -148,6 +148,8 @@
                 <argument>SLPProcessor</argument>
                 <argument>-p</argument>
                 <modulepath/>
+                <argument>-m</argument>
+                <argument>io.github.merykitty.slpprocessor/io.github.merykitty.slpprocessor.Info</argument>
                 <argument>--add-launcher</argument>
                 <argument>SLPDecoder=${project.resources.output}/decoder.properties</argument>
                 <argument>--add-launcher</argument>
