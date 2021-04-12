@@ -1,7 +1,7 @@
 /target/
 /resources/
 /data/
-/SLPProcessor/
+/MerySLP/
 /slp-processor.iml
 /.idea/
 *.jfr

@@ -3,6 +3,7 @@ package io.github.merykitty.meryslp;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 import io.github.merykitty.meryslp.misc.EnvironmentResolver;
 import io.github.merykitty.meryslp.misc.PrimitiveOptional;
@@ -20,6 +21,8 @@ public class SLPDecoder {
     private static final Path DEFAULT_OUTPUT_FOLDER = Path.of("data/decoder-output");
 
     public static void main(String[] args) throws IOException {
+        EnvironmentResolver.setLogLevel(Level.INFO);
+
         var parser = ArgumentParsers.newFor("SLPDecoder").build()
                 .defaultHelp(true)
                 .description("Decode SLP files into human readable graphics images and meta data");
@@ -33,7 +36,6 @@ public class SLPDecoder {
         try {
             ns = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
-            System.out.println("Incorrect command line format");
             return;
         }
         var configFile = EnvironmentResolver.homeDir().resolve(DEFAULT_CONFIG_FILE);
@@ -55,25 +57,25 @@ public class SLPDecoder {
                         processSLPFile(path, outputFolder, palettes);
                     });
         } catch (RuntimeException e) {
-            System.out.println("Error: " + e.getCause().toString());
+            EnvironmentResolver.error("Error: " + e.getCause().toString());
         } catch (Exception e) {
-            System.out.println("Error: " + e.toString());
+            EnvironmentResolver.error("Error: " + e.toString());
         }
     }
 
     private static void processSLPFile(Path inputFile, Path outputFolder, PaletteContainer palettes) {
         try {
             var fileName = inputFile.getFileName();
-            System.out.println("File name: " + fileName.toString());
+            EnvironmentResolver.info("File name: " + fileName.toString());
             long start = System.currentTimeMillis();
             var file = SLPFiles.decode(inputFile, palettes);
             long mid = System.currentTimeMillis();
-            System.out.println("Read slp file: " + (mid - start) + " ms");
+            EnvironmentResolver.info("Read slp file: " + (mid - start) + " ms");
             file.exportGraphics(outputFolder.resolve(fileName));
             long end = System.currentTimeMillis();
-            System.out.println("Print data: " + (end - mid) + " ms");
+            EnvironmentResolver.info("Print data: " + (end - mid) + " ms");
         } catch (Exception e) {
-            System.out.println(e);
+            EnvironmentResolver.info(e);
         }
     }
 }

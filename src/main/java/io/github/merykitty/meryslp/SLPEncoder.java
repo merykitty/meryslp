@@ -11,6 +11,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 public class SLPEncoder {
     private static final Path DEFAULT_CONFIG_FILE = Path.of("resources/aoe1-config.json");
@@ -19,6 +20,8 @@ public class SLPEncoder {
     private static final Path DEFAULT_OUTPUT_FOLDER = Path.of("data/encoder-output");
 
     public static void main(String[] args) throws IOException {
+        EnvironmentResolver.setLogLevel(Level.INFO);
+
         var parser = ArgumentParsers.newFor("SLPDecoder").build()
                 .defaultHelp(true)
                 .description("Encode human readable graphics images and meta data to SLP files");
@@ -32,7 +35,6 @@ public class SLPEncoder {
         try {
             ns = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
-            System.out.println("Incorrect command line format");
             return;
         }
 
@@ -53,25 +55,25 @@ public class SLPEncoder {
             files.filter(Files::isDirectory)
                     .forEach(path -> encodeSLP(path, outputFolder, palettes));
         } catch (RuntimeException e) {
-            System.out.println("Error: " + e.getCause().toString());
+            EnvironmentResolver.error("Error: " + e.getCause().toString());
         } catch (Exception e) {
-            System.out.println("Error: " + e.toString());
+            EnvironmentResolver.error("Error: " + e.toString());
         }
     }
 
     private static void encodeSLP(Path inputFile, Path outputFolder, PaletteContainer palettes) {
         try {
             var fileName = inputFile.getFileName();
-            System.out.println("File name: " + fileName.toString());
+            EnvironmentResolver.info("File name: " + fileName.toString());
             long start = System.currentTimeMillis();
             var file = SLPFiles.importGraphics(inputFile, palettes);
             long mid = System.currentTimeMillis();
-            System.out.println("Import graphics: " + (mid - start) + " ms");
+            EnvironmentResolver.info("Import graphics: " + (mid - start) + " ms");
             SLPFiles.encode(outputFolder.resolve(fileName), palettes, file, true);
             long end = System.currentTimeMillis();
-            System.out.println("Encode slp file: " + (end - mid) + " ms");
+            EnvironmentResolver.info("Encode slp file: " + (end - mid) + " ms");
         } catch (Exception e) {
-            System.out.println(e.toString());
+            EnvironmentResolver.info(e);
         }
     }
 }

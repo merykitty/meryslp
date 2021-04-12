@@ -6,6 +6,9 @@ import static jdk.incubator.foreign.CLinker.*;
 import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EnvironmentResolver {
     private static final long INIT_MAX_PATH_LENGTH = 256;
@@ -13,10 +16,12 @@ public class EnvironmentResolver {
 
     private static final String OS_NAME;
     private static final Path HOME_DIR;
+    private static final Logger LOGGER = Logger.getGlobal();
 
     static {
         try {
             OS_NAME = System.getProperty("os.name").toLowerCase();
+            LOGGER.addHandler(new ConsoleHandler());
             if (OS_NAME.contains("linux")) {
                 var execPath = Files.readSymbolicLink(Path.of("/proc/self/exe"));
                 var execName = execPath.getFileName().toString();
@@ -83,11 +88,31 @@ public class EnvironmentResolver {
         }
     }
 
+    public static void setLogLevel(Level level) {
+        LOGGER.setLevel(level);
+    }
+
     public static Path homeDir() {
         return HOME_DIR;
     }
 
     public static String osName() {
         return OS_NAME;
+    }
+
+    public static void debug(Object message) {
+        LOGGER.fine(message.toString());
+    }
+
+    public static void info(Object message) {
+        LOGGER.info(message.toString());
+    }
+
+    public static void warning(Object message) {
+        LOGGER.warning(message.toString());
+    }
+
+    public static void error(Object message) {
+        LOGGER.severe(message.toString());
     }
 }

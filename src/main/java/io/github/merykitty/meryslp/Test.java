@@ -3,6 +3,7 @@ package io.github.merykitty.meryslp;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 import io.github.merykitty.meryslp.common.SLPFiles;
 import io.github.merykitty.meryslp.image.PaletteContainer;
@@ -18,6 +19,7 @@ public class Test {
     private static final Path ENCODE_OUTPUT_FOLDER = HOME_DIR.resolve("data/encoder-output");
 
     public static void main(String[] args) throws IOException {
+        EnvironmentResolver.setLogLevel(Level.ALL);
 //        var palettes = new PaletteContainer(CONFIG_FILE, PALETTE_FOLDER);
 //        var files = Files.list(DECODE_INPUT_FOLDER);
 //        files.filter(Files::isRegularFile)
