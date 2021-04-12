@@ -84,27 +84,7 @@
           </execution>
 
           <execution>
-            <id>processor-packaged</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <outputDirectory>${project.basedir}/SLPProcessor</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.build.directory}/SLPDecoder</directory>
-                </resource>
-
-                <resource>
-                  <directory>${project.build.directory}/SLPEncoder</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>processor-resources</id>
+            <id>package-copy-resources</id>
             <goals>
               <goal>copy-resources</goal>
             </goals>
@@ -114,6 +94,7 @@
               <resources>
                 <resource>
                   <directory>${project.resources.output}</directory>
+                  <filtering>false</filtering>
                 </resource>
               </resources>
             </configuration>
@@ -278,6 +259,7 @@
                         <exclude>**/*.cpp</exclude>
                         <exclude>**/.vscode/**</exclude>
                       </excludes>
+                      <filtering>false</filtering>
                     </resource>
 
                     <resource>
@@ -286,6 +268,7 @@
                         <exclude>**/*.cpp</exclude>
                         <exclude>**/.vscode/**</exclude>
                       </excludes>
+                      <filtering>false</filtering>
                     </resource>
                   </resources>
                 </configuration>
@@ -336,6 +319,26 @@
                   </arguments>
                 </configuration>
               </execution>
+
+              <execution>
+                <id>package-copy-exe-unix-x64</id>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <executable>cp</executable>
+                  <arguments>
+                    <argument>-r</argument>
+                    <argument>-t</argument>
+                    <argument>${project.basedir}/SLPProcessor</argument>
+                    <argument>${project.build.directory}/SLPDecoder/bin</argument>
+                    <argument>${project.build.directory}/SLPDecoder/lib</argument>
+                    <argument>${project.build.directory}/SLPEncoder/bin</argument>
+                    <argument>${project.build.directory}/SLPEncoder/lib</argument>
+                  </arguments>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -374,6 +377,7 @@
                         <exclude>**/*.cpp</exclude>
                         <exclude>**/.vscode/**</exclude>
                       </excludes>
+                      <filtering>false</filtering>
                     </resource>
 
                     <resource>
@@ -382,6 +386,27 @@
                         <exclude>**/*.cpp</exclude>
                         <exclude>**/.vscode/**</exclude>
                       </excludes>
+                      <filtering>false</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>package-copy-exe-windows-x64</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <outputDirectory>${project.basedir}/SLPProcessor</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.build.directory}/SLPDecoder</directory>
+                    </resource>
+
+                    <resource>
+                      <directory>${project.build.directory}/SLPEncoder</directory>
                     </resource>
                   </resources>
                 </configuration>
