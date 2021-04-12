@@ -87,7 +87,6 @@ public class SecondaryFrameInfo {
         int height = (int)HEIGHT_HANDLE.get(data);
         int hotspotX = (int)HOTSPOT_X_HANDLE.get(data);
         int hotspotY = (int)HOTSPOT_Y_HANDLE.get(data);
-        assert(nul == 0 && propertiesLo == 0);
         return new SecondaryFrameInfo(cmdTableOffset, outlineTableOffset, nul, propertiesLo, propertiesHi, frameType, width, height, hotspotX, hotspotY);
     }
 

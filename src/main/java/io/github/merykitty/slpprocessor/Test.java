@@ -22,9 +22,13 @@ public class Test {
 //        var files = Files.list(DECODE_INPUT_FOLDER);
 //        files.filter(Files::isRegularFile)
 //                .forEach(path -> selfDecode(path, palettes));
-        System.out.println(System.getProperty("os.arch"));
-        decode();
-
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 50; i++) {
+            System.out.println(i);
+            decode();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
     }
 
     private static void decode() throws IOException {
@@ -37,21 +41,17 @@ public class Test {
     private static void processSLPFile(Path path, PaletteContainer palettes) {
         try {
             var fileName = path.getFileName();
-            System.out.println("File name: " + fileName.toString());
-            System.out.println("Size: " + Files.size(path));
             long start = System.currentTimeMillis();
             var file = SLPFiles.decode(path, palettes);
             long mid = System.currentTimeMillis();
-            System.out.println("Read slp file: " + (mid - start) + " ms");
             file.exportGraphics(DECODE_OUTPUT_FOLDER.resolve(fileName));
             long end = System.currentTimeMillis();
-            System.out.println("Print data: " + (end - mid) + " ms");
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (UnsupportedOperationException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         } catch (AssertionError e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

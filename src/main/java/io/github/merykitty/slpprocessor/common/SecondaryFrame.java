@@ -238,7 +238,7 @@ public class SecondaryFrame {
             try {
                 throw new IllegalArgumentException("Unrecognized type: 0x" + Integer.toHexString(type));
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
             return SecFrameType.VFX_ALPHA;
         }

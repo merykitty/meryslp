@@ -170,13 +170,16 @@
               </environmentVariables>
               <arguments>
                 <argument>--add-modules</argument>
-                <argument>jdk.incubator.foreign</argument>
+		        <argument>jdk.incubator.foreign</argument>
+		        <argument>-Xmx8g</argument>
                 <argument>-Dforeign.restricted=permit</argument>
                 <argument>-XX:CompileThreshold=1000</argument>
                 <argument>-XX:+UseParallelGC</argument>
                 <argument>-XX:+UnlockDiagnosticVMOptions</argument>
                 <argument>-XX:+UnlockExperimentalVMOptions</argument>
                 <argument>-XX:+TrustFinalNonStaticFields</argument>
+<!--                <argument>-XX:InlineFieldMaxFlatSize=0</argument>-->
+<!--                <argument>-XX:FlatArrayElementMaxSize=0</argument>-->
                 <argument>-XX:StartFlightRecording:duration=600s,filename=profile.jfr,delay=30s,settings=strict.jfc</argument>
                 <argument>-ea</argument>
                 <argument>-p</argument>
