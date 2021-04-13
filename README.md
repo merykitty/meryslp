@@ -82,3 +82,12 @@ To report a bug or request an enhancement, create an issue in the issue tab of t
 - [Valhalla build of OpenJDK](https://github.com/openjdk/valhalla)
 - OpenJDK 16 or higher if you can't build the Hotspot yourself, remove the \_\_primitive\_\_ annotations in the beginning of the source files
 
+
+## My mods
+
+1, [Grid mod](https://www.ageofempires.com/mods/details/22069/): Gridify the terrain, increase cognitive sense of the battlefield.
+2, [Small trees](https://www.ageofempires.com/mods/details/22064/): Replace all trees with visually smaller versions, improve vision and navigation ability.
+3, [High contrast fish](https://www.ageofempires.com/mods/details/22065/): Increase the contrast of fishes in accordance to ocean background, easier to spot for early food scouting
+
+
+## [Donation](https://streamlabs.com/merykitty99/tip)
