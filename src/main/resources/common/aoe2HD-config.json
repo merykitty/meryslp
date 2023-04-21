@@ -1,0 +1,13 @@
+{
+
+    "0x00" : "/Standard_Graphics.pal",
+    "0x10" : "/Standard_Graphics.pal",
+    "0x18" : "/Standard_Graphics.pal",
+    "0x010000" : "clf_pal.pal",
+    "0x020000" : "/pal_2.pal",
+    "0x030000" : "/pal_3.pal",
+    "0x040000" : "/pal_4.pal",
+    "0x050000" : "/pal_5.pal",
+    "0x060000" : "/pal_6.pal"
+
+}
